@@ -2,11 +2,12 @@
 import java.util.Stack;
 
 class Hasher{
-    public static final char[] SEED = {'4', 'e', '1', '1', '0',
-                                        '0', '7', '0', '0', '0',
-                                        '1', '1', '7', '7', '1',
-                                        'e', '0', 'f', '0', 'c',
-                                        'c', 'e', '8', '1'};
+    // public static final char[] SEED = {'4', 'e', '1', '1', '0',
+    //                                     '0', '7', '0', '0', '0',
+    //                                     '1', '1', '7', '7', '1',
+    //                                     'e', '0', 'f', '0', 'c',
+    //                                     'c', 'e', '8', '1'};
+    public static final String SEED = "4e1100700011771e0f0cce81751929561293566283846321234012347819230af";
     public static final int ITERATIONS = 200;
     private char[] seed;
 
@@ -25,7 +26,7 @@ class Hasher{
         char[] array = stringToChar(newString);
 
         // Do the iterations
-        char[] hash = hex.toCharArray();
+        String hash = hex;
         for (int i = 0; i < ITERATIONS; i++){
             hash = bucketTranspose(hash, 3);
             hash = substitution(hash, outputLength);
@@ -35,7 +36,7 @@ class Hasher{
             hash = substitution(hash, outputLength);
         }
 
-        return charToHex(hash);
+        return hash;
     }
 
     public static String stringToHexString(String string){
@@ -78,13 +79,13 @@ class Hasher{
         }
 
         // Pick the chars from the buckets
-        String newString = "";
+        String newString ="";
         for (int i = 0; i < bucketNumber; i++){
             while (!buckets[i].empty()){
-                newString += buckets[i].pop();
+                newString += Character.toString(buckets[i].pop());
             }
         }
-        System.out.println("bucketTranspose - " + newString);
+
         return newString;
     }
 
@@ -121,36 +122,69 @@ class Hasher{
         return newString;
     }
 
-    public static char[] substitution(char[] array, int outputLength){
+    public static String substitution(String string, int outputLength){
         // Takes a char array of hex values and substitutes them, shortening the
         // sequence if it is longer than the given outputLength
 
         // initialize starting seed
-        char[] temp = new char[outputLength];
-        for (int i = 0; i < temp.length && i < SEED.length; i++){
-            temp[i] = SEED[i];
+        String newString = "";
+        for (int i = 0; i < outputLength; i++){
+            newString += Character.toString(SEED.charAt(i % outputLength));
         }
 
         // Do loop
         int i = 0;
         int j = 0;
-        while (i < array.length){
+        while (i < string.length()){
+            // reset counter if it exceeds the max value
             if (j >= outputLength){
                 j = 0;
             }
             // set value to combination, if value is max set value to min plus remainder
-            int x = Integer.parseInt(Character.toString(temp[j]), 16) + Integer.parseInt(Character.toString(array[i]), 16);
-            // int x = temp[j] + array[i];
+            int x = Integer.parseInt(newString.subSequence(j, j+1).toString(), 16) + Integer.parseInt(string.subSequence(i, i+1).toString(), 16);
             int max = 15;
             if (x > max){
                 x -= max;
             }
+            char[] temp = newString.toCharArray();
             temp[j] = Integer.toHexString(x).charAt(0);
             i++;
             j++;
+            newString = String.copyValueOf(temp);
         }
-        return temp;
+        return newString;
     }
+
+    // public static char[] substitution(char[] array, int outputLength){
+    //     // Takes a char array of hex values and substitutes them, shortening the
+    //     // sequence if it is longer than the given outputLength
+    //
+    //     // initialize starting seed
+    //     char[] temp = new char[outputLength];
+    //     for (int i = 0; i < temp.length && i < SEED.length; i++){
+    //         temp[i] = SEED[i];
+    //     }
+    //
+    //     // Do loop
+    //     int i = 0;
+    //     int j = 0;
+    //     while (i < array.length){
+    //         if (j >= outputLength){
+    //             j = 0;
+    //         }
+    //         // set value to combination, if value is max set value to min plus remainder
+    //         int x = Integer.parseInt(Character.toString(temp[j]), 16) + Integer.parseInt(Character.toString(array[i]), 16);
+    //         // int x = temp[j] + array[i];
+    //         int max = 15;
+    //         if (x > max){
+    //             x -= max;
+    //         }
+    //         temp[j] = Integer.toHexString(x).charAt(0);
+    //         i++;
+    //         j++;
+    //     }
+    //     return temp;
+    // }
 
     public static char[] reverse(char[] array){
         int length = array.length;
