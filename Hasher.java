@@ -8,7 +8,7 @@ class Hasher{
     //                                     'e', '0', 'f', '0', 'c',
     //                                     'c', 'e', '8', '1'};
     public static final String SEED = "4e1100700011771e0f0cce81751929561293566283846321234012347819230af";
-    public static final int ITERATIONS = 200;
+    public static final int ITERATIONS = 20;
     private char[] seed;
 
     public Hasher(String string){
@@ -29,11 +29,14 @@ class Hasher{
         String hash = hex;
         for (int i = 0; i < ITERATIONS; i++){
             hash = bucketTranspose(hash, 3);
-            hash = substitution(hash, outputLength);
+            hash = substitution(hash, outputLength, 1);
+            // hash = substitution(hash, outputLength, 3);
             hash = bucketTranspose(hash, 5);
-            hash = substitution(hash, outputLength);
+            hash = substitution(hash, outputLength, 2);
+            // hash = substitution(hash, outputLength, 5);
             hash = bucketTranspose(hash, 7);
-            hash = substitution(hash, outputLength);
+            hash = substitution(hash, outputLength, 1);
+            // hash = substitution(hash, outputLength, 7);
         }
 
         return hash;
@@ -122,7 +125,7 @@ class Hasher{
         return newString;
     }
 
-    public static String substitution(String string, int outputLength){
+    public static String substitution(String string, int outputLength, int multiplier){
         // Takes a char array of hex values and substitutes them, shortening the
         // sequence if it is longer than the given outputLength
 
@@ -141,9 +144,9 @@ class Hasher{
                 j = 0;
             }
             // set value to combination, if value is max set value to min plus remainder
-            int x = Integer.parseInt(newString.subSequence(j, j+1).toString(), 16) + Integer.parseInt(string.subSequence(i, i+1).toString(), 16);
+            int x = Integer.parseInt(newString.subSequence(j, j+1).toString(), 16) + (Integer.parseInt(string.subSequence(i, i+1).toString(), 16) * multiplier);
             int max = 15;
-            if (x > max){
+            while (x > max){
                 x -= max;
             }
             char[] temp = newString.toCharArray();
@@ -225,6 +228,7 @@ class Hasher{
 
 /**
 Possibly useful methods in java
+
     String.copyValueOf(char[] data) - static String
         Returns a String that represents the character sequence in the array specified.
 
@@ -233,6 +237,9 @@ Possibly useful methods in java
 
     String.subSequence(int beginIndex, int endIndex)
         Returns a new character sequence that is a subsequence of this sequence.
+
+    String.substring(int beginIndex, int endIndex)
+        Returns String
 
     Integer.parseInt(String s, int radix) - static int
         Parses the string argument as a signed integer in the radix specified by the second argument.
